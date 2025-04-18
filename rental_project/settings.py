@@ -8,7 +8,10 @@ SECRET_KEY = 'django-insecure-^_i=^rg*4=4&$9id(6sfw00my3p-d4pu_r)b_so#l7=^vyoh%s
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '13.61.189.0',
+    'localhost',
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -69,7 +72,6 @@ DATABASES = DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Валідація паролів
 AUTH_PASSWORD_VALIDATORS = [
