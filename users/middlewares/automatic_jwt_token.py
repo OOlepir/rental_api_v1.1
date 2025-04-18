@@ -4,6 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.views import TokenRefreshView
 
 
 class JWTAuthenticationMiddleware(MiddlewareMixin):
@@ -67,3 +68,17 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
     def clear_jwt_cookies(self, request: Request):
         request.COOKIES.pop("access_token", None)
         request.COOKIES.pop("refresh_token", None)
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            access = response.data['access']
+            response.set_cookie(
+                key='access_token',
+                value=access,
+                httponly=True,
+                samesite='Lax',
+                secure=False,  # або True на проді
+            )
+        return response

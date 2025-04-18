@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.generics import CreateAPIView
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -62,10 +63,23 @@ class LoginView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         user = authenticate(email=request.data['email'], password=request.data['password'])
+
         if user:
-            response = Response({"message": "Logged in successfully"}, status=status.HTTP_200_OK)
-            return set_jwt_cookies(response, user)
-        return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            refresh = RefreshToken.for_user(user)
+            access = refresh.access_token
+
+            data = {
+                "message": "Вход выполнен успешно",
+                "access_token": str(access),
+                "refresh_token": str(refresh),
+            }
+            response = Response(data, status=status.HTTP_200_OK)
+
+            set_jwt_cookies(response, user)
+
+            return response
+
+        return Response({"message": "Неверные учетные данные"}, status=status.HTTP_401_UNAUTHORIZED)
 
 @extend_schema(
     summary="Выход пользователя",
